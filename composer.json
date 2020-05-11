@@ -1,6 +1,15 @@
 {
     "name": "white43/yii2-cloud-asset-manager",
+    "description": "This extension uploads your local yii2 assets to CDN services",
     "type": "yii2-extension",
+    "keywords": [
+        "yii2",
+        "extension",
+        "cloud",
+        "cdn",
+        "asset",
+        "assets"
+    ],
     "require": {
         "php": "^7.1",
         "yiisoft/yii2": "~2.0.0",
