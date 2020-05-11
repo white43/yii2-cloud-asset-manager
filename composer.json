@@ -1,0 +1,26 @@
+{
+    "name": "white43/yii2-cloud-asset-manager",
+    "type": "yii2-extension",
+    "require": {
+        "php": "^7.1",
+        "yiisoft/yii2": "~2.0.0",
+        "creocoder/yii2-flysystem": "^0.9"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Anton Belyaev"
+        }
+    ],
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://asset-packagist.org"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "white43\\CloudAssetManager\\": "src/"
+        }
+    }
+}
