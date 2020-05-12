@@ -88,12 +88,15 @@ class AssetManager extends \yii\web\AssetManager
     protected function publishFile($src)
     {
         $dirname = dirname($src);
+        $filename = basename($src);
 
-        return $this->publishDirectory($dirname, [
+        [$basePath, $baseUrl] = $this->publishDirectory($src, [
             'only' => [
                 substr($src, strlen($dirname)),
             ],
         ]);
+
+        return [$basePath, $baseUrl . '/' . $filename];
     }
 
     /**
