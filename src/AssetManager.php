@@ -90,7 +90,7 @@ class AssetManager extends \yii\web\AssetManager
         $dirname = dirname($src);
         $filename = basename($src);
 
-        [$basePath, $baseUrl] = $this->publishDirectory($src, [
+        [$basePath, $baseUrl] = $this->publishDirectory($dirname, [
             'only' => [
                 substr($src, strlen($dirname)),
             ],
