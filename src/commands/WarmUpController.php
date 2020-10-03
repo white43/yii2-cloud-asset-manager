@@ -15,7 +15,7 @@ class WarmUpController extends Controller
      * @return int
      * @throws \yii\base\InvalidConfigException
      */
-    public function actionIndex(): int
+    public function actionIndex()
     {
         /** @var \white43\CloudAssetManager\AssetManager $am */
         $am = \Yii::$app->get('assetManager');
@@ -41,7 +41,7 @@ class WarmUpController extends Controller
     /**
      * @return array
      */
-    protected function getAssetsBundles(): array
+    protected function getAssetsBundles()
     {
         if (!empty(\Yii::$app->params['assets-warm-up-bundles'])) {
             return \Yii::$app->params['assets-warm-up-bundles'];

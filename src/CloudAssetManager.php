@@ -10,7 +10,7 @@ use yii\helpers\FileHelper;
 
 class CloudAssetManager extends BaseAssetManager
 {
-    protected const CACHE_META_KEY = 'cloud-assets-meta-%s';
+    const CACHE_META_KEY = 'cloud-assets-meta-%s';
 
     /**
      * @var Filesystem
@@ -75,7 +75,7 @@ class CloudAssetManager extends BaseAssetManager
                 }
 
                 $key = $this->getMetaKey($dir . $dstDirectory);
-                $dirMeta = $meta[$key] ?? null;
+                $dirMeta = isset($meta[$key]) ? $meta[$key] : null;
 
                 if (!isset($dirMeta)) {
                     $this->filesystem->createDir($dstDir . $dstDirectory);
@@ -91,7 +91,7 @@ class CloudAssetManager extends BaseAssetManager
                 }
 
                 $key = $this->getMetaKey(dirname($dir . $dstFile));
-                $dirMeta = $meta[$key] ?? null;
+                $dirMeta = isset($meta[$key]) ? $meta[$key] : null;
 
                 try {
                     if (!isset($dirMeta[$dstBaseFile])) {
@@ -117,7 +117,7 @@ class CloudAssetManager extends BaseAssetManager
      * @param string $hash
      * @return array
      */
-    private function getMetaFromRemoteData(array $data, string $hash): array
+    private function getMetaFromRemoteData(array $data, $hash)
     {
         $meta = [];
         $key = $this->getMetaKey($hash);
@@ -137,7 +137,7 @@ class CloudAssetManager extends BaseAssetManager
      * @param string $dir
      * @return string
      */
-    private function getMetaKey(string $dir): string
+    private function getMetaKey($dir)
     {
         return rtrim(sprintf(self::CACHE_META_KEY, $dir), '-/');
     }

@@ -9,7 +9,7 @@ use yii\helpers\FileHelper;
 
 class BaseAssetManager extends \yii\web\AssetManager
 {
-    protected const CACHE_HASH_KEY = 'cloud-assets-hash-%s';
+    const CACHE_HASH_KEY = 'cloud-assets-hash-%s';
 
     /**
      * @var Cache
@@ -72,7 +72,7 @@ class BaseAssetManager extends \yii\web\AssetManager
         $dirname = dirname($src);
         $filename = basename($src);
 
-        [$basePath, $baseUrl] = $this->publishDirectory($dirname, [
+        list($basePath, $baseUrl) = $this->publishDirectory($dirname, [
             'only' => [
                 substr($src, strlen($dirname)),
             ],
