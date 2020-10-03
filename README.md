@@ -47,3 +47,31 @@ $config = [
 ```
 
 Assets will not be uploaded to cloud storage. This way may be useful for testing and/or when you just need to keep constant hashes for your assets without any cloud storage.
+
+#### Upload your assets in the background
+
+Add some configuration to your `console.php`.
+
+```
+$config = [
+    'controllerMap' => [
+        'warm-up' => \white43\CloudAssetManager\commands\WarmUpController::class,
+    ],
+];
+```
+
+Add some configuration to your `params.php`.
+
+```
+$params = [
+    'assets-warm-up-bundles' => [
+        \app\assets\AppAsset::class,
+    ],
+];
+```
+
+Run next command in the background (i.e. when a container is starting)
+
+```
+./yii warm-up
+```
