@@ -8,13 +8,13 @@ composer require white43/yii2-cloud-asset-manager
 
 From suggested packages you will need to choose and install one to work with your cloud storage.
 
-#### Configuration
+#### Cloud configuration
 
 ```
 $config = [
     'components' => [
         'assetManager' => [
-            'class'    => \white43\CloudAssetManager\AssetManager::class,
+            'class'    => \white43\CloudAssetManager\CloudAssetManager::class,
             'basePath' => 'relative/path/for/assets',
             'cache'    => 'cache', // Name of your cache component
             'baseUrl'  => '//your.cdn.com/relative/path/for/assets',
@@ -31,3 +31,19 @@ $config = [
 ```
 
 Assets will be automatically uploaded to cloud storage. On the browser side users will get files from that cloud. Cache component will be used to speed up page load.  
+
+#### Local configuration
+
+```
+$config = [
+    'components' => [
+        'assetManager' => [
+            'class'    => \white43\CloudAssetManager\LocalAssetManager::class,
+            'cache'    => 'cache', // Name of your cache component
+            ],
+        ],
+    ],
+];
+```
+
+Assets will not be uploaded to cloud storage. This way may be useful for testing and/or when you just need to keep constant hashes for your assets without any cloud storage.
