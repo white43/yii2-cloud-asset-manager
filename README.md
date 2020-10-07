@@ -57,6 +57,11 @@ $config = [
     'controllerMap' => [
         'warm-up' => \white43\CloudAssetManager\commands\WarmUpController::class,
     ],
+    'components' => [
+        'assetManager' => [
+            'basePath' => '@app/web/assets', // @webroot doesn't exist in CLI mode  
+        ],
+    ],
 ];
 ```
 
