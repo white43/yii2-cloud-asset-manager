@@ -32,7 +32,7 @@ class CloudAssetManager extends BaseAssetManager
         $this->filesystem = Instance::ensure($this->filesystem, Filesystem::class);
 
         if (!empty($this->filesystem->cache)) {
-            throw new InvalidConfigException('You must not use League\Flysystem\Cached\CachedAdapter due to its inefficiency. This extension has its own caching system.');
+            throw new InvalidConfigException('You should not use League\Flysystem\Cached\CachedAdapter due to its inefficiency. This extension has its own caching system.');
         }
     }
 
