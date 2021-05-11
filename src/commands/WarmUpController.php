@@ -17,7 +17,7 @@ class WarmUpController extends Controller
      */
     public function actionIndex()
     {
-        /** @var \white43\CloudAssetManager\AssetManager $am */
+        /** @var \white43\CloudAssetManager\BaseAssetManager $am */
         $am = \Yii::$app->get('assetManager');
 
         $time = -microtime(true);
