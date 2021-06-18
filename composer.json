@@ -11,7 +11,7 @@
         "assets"
     ],
     "require": {
-        "php": "^5.6 || ^7.0",
+        "php": "^5.6 || ^7.0 || ^8.0",
         "yiisoft/yii2": "~2.0.13",
         "bower-asset/jquery": ">=2.2",
         "creocoder/yii2-flysystem": "^0.9"
