@@ -16,5 +16,6 @@ class LocalAssetManager extends BaseAssetManager
         }
 
         $this->basePath = realpath($this->basePath);
+        $this->baseUrl = rtrim(\Yii::getAlias($this->baseUrl), '/');
     }
 }
