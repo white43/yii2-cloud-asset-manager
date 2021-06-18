@@ -58,12 +58,12 @@ class CloudAssetManager extends BaseAssetManager
 
             if (isset($options['beforeCopy'])) {
                 $beforeCopy = $options['beforeCopy'];
-            } else if ($this->beforeCopy !== null) {
+            } elseif ($this->beforeCopy !== null) {
                 $beforeCopy = $this->beforeCopy;
             }
             if (isset($options['afterCopy'])) {
                 $afterCopy = $options['afterCopy'];
-            } else if ($this->afterCopy !== null) {
+            } elseif ($this->afterCopy !== null) {
                 $afterCopy = $this->afterCopy;
             }
 
@@ -142,5 +142,3 @@ class CloudAssetManager extends BaseAssetManager
         return rtrim(sprintf(self::CACHE_META_KEY, $dir), '-/');
     }
 }
-
-

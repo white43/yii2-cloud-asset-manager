@@ -32,5 +32,8 @@
         "psr-4": {
             "white43\\CloudAssetManager\\": "src/"
         }
+    },
+    "require-dev": {
+        "squizlabs/php_codesniffer": "^3.6"
     }
 }
