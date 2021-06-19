@@ -16,6 +16,9 @@ class LocalAssetManager extends BaseAssetManager
         }
 
         $this->basePath = realpath($this->basePath);
-        $this->baseUrl = rtrim(\Yii::getAlias($this->baseUrl), '/');
+
+        if (PHP_SAPI !== 'cli') {
+            $this->baseUrl = rtrim(\Yii::getAlias($this->baseUrl), '/');
+        }
     }
 }
