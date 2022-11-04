@@ -22,6 +22,14 @@ class BaseAssetManager extends \yii\web\AssetManager
     public $filterFilesOptions = [];
 
     /**
+     * @var bool This option tells the asset manager to print information to stdout about every single file or directory
+     * after copying them from source directory to target one. It should help to identify missed asset bundles if you
+     * see some debug messages after the message indicating the end of the warm-up process. This option is ignored when
+     * [[afterCopy]] is set.
+     */
+    public $verbose = false;
+
+    /**
      * @var array published assets
      */
     protected $_published = [];
@@ -35,6 +43,10 @@ class BaseAssetManager extends \yii\web\AssetManager
         $this->beforeCopy = function ($from, $to) {
             return strncmp(basename($from), '.', 1) !== 0;
         };
+
+        if ($this->verbose && $this->afterCopy === null) {
+            $this->afterCopy = $this->beVerbose();
+        }
 
         $this->cache = Instance::ensure($this->cache, Cache::class);
     }
@@ -109,5 +121,20 @@ class BaseAssetManager extends \yii\web\AssetManager
         }
 
         return $hash;
+    }
+
+    /**
+     * @return Closure(string, string):void
+     */
+    protected function beVerbose(): callable
+    {
+        return function (string $from, string $to): void {
+            $kind = is_dir($from) ? 'Directory' : 'File';
+
+            fwrite(
+                STDOUT,
+                sprintf('%s "%s" was published to "%s"', $kind, $from, $to) . PHP_EOL
+            );
+        };
     }
 }
