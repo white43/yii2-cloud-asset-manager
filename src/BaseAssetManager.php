@@ -9,7 +9,7 @@ use yii\helpers\FileHelper;
 
 class BaseAssetManager extends \yii\web\AssetManager
 {
-    const CACHE_HASH_KEY = 'cloud-assets-hash-%s';
+    protected const CACHE_HASH_KEY = 'cloud-assets-hash-%s';
 
     /**
      * @var Cache
@@ -32,15 +32,15 @@ class BaseAssetManager extends \yii\web\AssetManager
     /**
      * @var array published assets
      */
-    protected $_published = [];
+    protected $published = [];
 
     /**
      * Initializes the component.
      * @throws \yii\base\InvalidConfigException
      */
-    public function init()
+    public function init(): void
     {
-        $this->beforeCopy = function ($from, $to) {
+        $this->beforeCopy = function (string $from, string $_): bool {
             return strncmp(basename($from), '.', 1) !== 0;
         };
 
@@ -60,8 +60,8 @@ class BaseAssetManager extends \yii\web\AssetManager
     {
         $path = \Yii::getAlias($path);
 
-        if (isset($this->_published[$path])) {
-            return $this->_published[$path];
+        if (isset($this->published[$path])) {
+            return $this->published[$path];
         }
 
         if (!is_string($path) || ($src = realpath($path)) === false) {
@@ -69,10 +69,10 @@ class BaseAssetManager extends \yii\web\AssetManager
         }
 
         if (is_file($src)) {
-            return $this->_published[$path] = $this->publishFile($src);
+            return $this->published[$path] = $this->publishFile($src);
         }
 
-        return $this->_published[$path] = $this->publishDirectory($src, $options);
+        return $this->published[$path] = $this->publishDirectory($src, $options);
     }
 
     /**

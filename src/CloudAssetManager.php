@@ -8,14 +8,14 @@ use League\Flysystem\Filesystem;
 use League\Flysystem\FilesystemAdapter;
 use League\Flysystem\StorageAttributes;
 use League\Flysystem\UnableToWriteFile;
-use Yii;
 use yii\base\InvalidConfigException;
+use yii\caching\Cache;
 use yii\di\Instance;
 use yii\helpers\FileHelper;
 
 class CloudAssetManager extends BaseAssetManager
 {
-    const CACHE_META_KEY = 'cloud-assets-meta-%s';
+    protected const CACHE_META_KEY = 'cloud-assets-meta-%s';
 
     /**
      * @var array|string|object|null
@@ -31,7 +31,7 @@ class CloudAssetManager extends BaseAssetManager
      * Initializes the component.
      * @throws \yii\base\InvalidConfigException
      */
-    public function init()
+    public function init(): void
     {
         parent::init();
 
@@ -65,6 +65,7 @@ class CloudAssetManager extends BaseAssetManager
      * @param array $options
      * @return string[]
      * @throws \League\Flysystem\FilesystemException
+     * @throws InvalidConfigException
      */
     protected function publishDirectory($src, $options)
     {
@@ -75,8 +76,10 @@ class CloudAssetManager extends BaseAssetManager
         $dir = $this->hash($src);
         $dstDir = $this->basePath . DIRECTORY_SEPARATOR . $dir;
 
+        $cache = Instance::ensure($this->cache, Cache::class);
+
         $finalKey = $this->getMetaKey($dir . '-completed');
-        $completed = Yii::$app->cache->get($finalKey);
+        $completed = $cache->get($finalKey);
 
         if (!empty($options['forceCopy']) || ($this->forceCopy && !isset($options['forceCopy'])) || !$completed) {
             $currentLength = strlen($src);
@@ -135,7 +138,7 @@ class CloudAssetManager extends BaseAssetManager
                 }
             }
 
-            Yii::$app->cache->set($finalKey, true);
+            $cache->set($finalKey, true);
         }
 
         return [$dstDir, $this->baseUrl . '/' . $dir];
