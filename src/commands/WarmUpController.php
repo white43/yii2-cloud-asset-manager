@@ -2,8 +2,11 @@
 
 namespace white43\CloudAssetManager\commands;
 
+use Yii;
+use yii\base\InvalidConfigException;
 use yii\console\Controller;
 use yii\console\ExitCode;
+use yii\web\AssetBundle;
 
 /**
  * Class AssetsWarmUpController
@@ -18,17 +21,21 @@ class WarmUpController extends Controller
     public function actionIndex()
     {
         /** @var \white43\CloudAssetManager\BaseAssetManager $am */
-        $am = \Yii::$app->get('assetManager');
+        $am = Yii::$app->get('assetManager');
 
         $time = -microtime(true);
 
         foreach ($this->getAssetsBundles() as $bundle) {
             try {
-                /** @var \yii\web\AssetBundle $bundle */
-                $bundle = \Yii::createObject($bundle);
-                $bundle->publish($am);
+                $object = Yii::createObject($bundle);
+
+                if (!$object instanceof AssetBundle) {
+                    throw new InvalidConfigException('Bundles must be instances of type yii\web\AssetBundle');
+                }
+
+                $object->publish($am);
             } catch (\Throwable $e) {
-                \Yii::$app->errorHandler->logException($e);
+                Yii::$app->errorHandler->logException($e);
             }
         }
 
@@ -39,14 +46,19 @@ class WarmUpController extends Controller
     }
 
     /**
-     * @return array
+     * @return string[]
      */
-    protected function getAssetsBundles()
+    protected function getAssetsBundles(): array
     {
-        if (!empty(\Yii::$app->params['assets-warm-up-bundles'])) {
-            return \Yii::$app->params['assets-warm-up-bundles'];
+        $bundles = [];
+
+        /** @var mixed $bundle */
+        foreach (Yii::$app->params['assets-warm-up-bundles'] ?? [] as $bundle) {
+            if (is_string($bundle)) {
+                $bundles[] = $bundle;
+            }
         }
 
-        return [];
+        return $bundles;
     }
 }

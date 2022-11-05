@@ -9,7 +9,6 @@ use League\Flysystem\FilesystemAdapter;
 use League\Flysystem\StorageAttributes;
 use League\Flysystem\UnableToWriteFile;
 use yii\base\InvalidConfigException;
-use yii\caching\Cache;
 use yii\di\Instance;
 use yii\helpers\FileHelper;
 
@@ -76,24 +75,27 @@ class CloudAssetManager extends BaseAssetManager
         $dir = $this->hash($src);
         $dstDir = $this->basePath . DIRECTORY_SEPARATOR . $dir;
 
-        $cache = Instance::ensure($this->cache, Cache::class);
-
         $finalKey = $this->getMetaKey($dir . '-completed');
-        $completed = $cache->get($finalKey);
+        $completed = (bool)$this->cache->get($finalKey);
 
         if (!empty($options['forceCopy']) || ($this->forceCopy && !isset($options['forceCopy'])) || !$completed) {
             $currentLength = strlen($src);
+            /** @var string[] $directories */
             $directories = FileHelper::findDirectories($src, array_merge($this->filterFilesOptions, $options));
+            /** @var string[] $files */
             $files = FileHelper::findFiles($src, array_merge($this->filterFilesOptions, $options));
 
             $meta = $this->getMetaFromRemoteData($this->filesystem->listContents($dstDir, true), $dir);
 
-            if (isset($options['beforeCopy'])) {
+            $beforeCopy = null;
+            $afterCopy = null;
+
+            if (isset($options['beforeCopy']) && is_callable($options['beforeCopy'])) {
                 $beforeCopy = $options['beforeCopy'];
             } elseif ($this->beforeCopy !== null) {
                 $beforeCopy = $this->beforeCopy;
             }
-            if (isset($options['afterCopy'])) {
+            if (isset($options['afterCopy']) && is_callable($options['afterCopy'])) {
                 $afterCopy = $options['afterCopy'];
             } elseif ($this->afterCopy !== null) {
                 $afterCopy = $this->afterCopy;
@@ -138,7 +140,7 @@ class CloudAssetManager extends BaseAssetManager
                 }
             }
 
-            $cache->set($finalKey, true);
+            $this->cache->set($finalKey, true);
         }
 
         return [$dstDir, $this->baseUrl . '/' . $dir];

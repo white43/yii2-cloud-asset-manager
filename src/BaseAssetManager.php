@@ -30,7 +30,7 @@ class BaseAssetManager extends \yii\web\AssetManager
     public $verbose = false;
 
     /**
-     * @var array published assets
+     * @var string[][] published assets
      */
     protected $published = [];
 
@@ -56,7 +56,7 @@ class BaseAssetManager extends \yii\web\AssetManager
      * @param array $options
      * @return string[]
      */
-    public function publish($path, $options = [])
+    public function publish($path, $options = []): array
     {
         $path = \Yii::getAlias($path);
 
@@ -79,7 +79,7 @@ class BaseAssetManager extends \yii\web\AssetManager
      * @param string $src
      * @return string[]
      */
-    protected function publishFile($src)
+    protected function publishFile($src): array
     {
         $dirname = dirname($src);
         $filename = basename($src);
@@ -97,19 +97,21 @@ class BaseAssetManager extends \yii\web\AssetManager
      * @param string $path
      * @return string
      */
-    protected function hash($path)
+    protected function hash($path): string
     {
         if (is_file($path)) {
             $path = dirname($path);
         }
 
         $key = sprintf(self::CACHE_HASH_KEY, $path);
+        /** @var mixed $hash */
         $hash = $this->cache->get($key);
 
         // During warm-up process we need to renew a cached hash
         $is_cli = PHP_SAPI === 'cli';
 
         if ($hash === false || $is_cli) {
+            /** @var string[] $files */
             $files = FileHelper::findFiles($path, $this->filterFilesOptions);
             $hashes = [];
 
@@ -121,6 +123,10 @@ class BaseAssetManager extends \yii\web\AssetManager
             $hash = md5(join('', $hashes));
 
             $this->cache->set($key, $hash);
+        }
+
+        if (!is_string($hash)) {
+            throw new \Exception(); // TODO
         }
 
         return $hash;
