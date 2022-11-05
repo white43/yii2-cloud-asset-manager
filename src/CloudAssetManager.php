@@ -18,12 +18,12 @@ class CloudAssetManager extends BaseAssetManager
     protected const CACHE_META_KEY = 'cloud-assets-meta-%s';
 
     /**
-     * @var array|string|object|null
+     * @var mixed
      */
     public $adapter;
 
     /**
-     * @var array|string|object|null
+     * @var mixed
      */
     public $filesystem;
 
@@ -41,22 +41,22 @@ class CloudAssetManager extends BaseAssetManager
 
         if ($this->filesystem instanceof Closure) {
             $closure = $this->filesystem;
-            $this->filesystem = Instance::ensure($closure(), Filesystem::class);
-        } elseif ($this->filesystem) {
+            $this->filesystem = $closure();
+        } elseif (empty($this->filesystem) && $this->adapter instanceof Closure) {
+            $closure = $this->adapter;
+            $this->adapter = $closure();
+        }
+
+        if (is_object($this->filesystem) || is_array($this->filesystem) || is_string($this->filesystem)) {
             $this->filesystem = Instance::ensure($this->filesystem, Filesystem::class);
-        } else {
-            if ($this->adapter instanceof Closure) {
-                $closure = $this->adapter;
-                $this->adapter = Instance::ensure($closure(), FilesystemAdapter::class);
-            } elseif ($this->adapter) {
-                $this->adapter = Instance::ensure($this->adapter, FilesystemAdapter::class);
-            }
-
-            if (!$this->adapter instanceof FilesystemAdapter) {
-                throw new \Exception(); // TODO
-            }
-
+        } elseif (is_object($this->adapter) || is_array($this->adapter) || is_string($this->adapter)) {
+            $this->adapter = Instance::ensure($this->adapter, FilesystemAdapter::class);
             $this->filesystem = new Filesystem($this->adapter);
+        } else {
+            throw new InvalidConfigException(
+                'Filesystem or adapter property must be of type object, array, string or closure. ' .
+                'Closure must return object, array or string'
+            );
         }
     }
 
