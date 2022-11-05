@@ -2,8 +2,13 @@
 
 namespace white43\CloudAssetManager;
 
-use creocoder\flysystem\Filesystem;
-use League\Flysystem\FileExistsException;
+use Closure;
+use League\Flysystem\DirectoryListing;
+use League\Flysystem\Filesystem;
+use League\Flysystem\FilesystemAdapter;
+use League\Flysystem\StorageAttributes;
+use League\Flysystem\UnableToWriteFile;
+use Yii;
 use yii\base\InvalidConfigException;
 use yii\di\Instance;
 use yii\helpers\FileHelper;
@@ -13,7 +18,12 @@ class CloudAssetManager extends BaseAssetManager
     const CACHE_META_KEY = 'cloud-assets-meta-%s';
 
     /**
-     * @var Filesystem
+     * @var array|string|object|null
+     */
+    public $adapter;
+
+    /**
+     * @var array|string|object|null
      */
     public $filesystem;
 
@@ -29,10 +39,24 @@ class CloudAssetManager extends BaseAssetManager
             throw new InvalidConfigException('Relative path at the destination must be defined.');
         }
 
-        $this->filesystem = Instance::ensure($this->filesystem, Filesystem::class);
+        if ($this->filesystem instanceof Closure) {
+            $closure = $this->filesystem;
+            $this->filesystem = Instance::ensure($closure(), Filesystem::class);
+        } elseif ($this->filesystem) {
+            $this->filesystem = Instance::ensure($this->filesystem, Filesystem::class);
+        } else {
+            if ($this->adapter instanceof Closure) {
+                $closure = $this->adapter;
+                $this->adapter = Instance::ensure($closure(), FilesystemAdapter::class);
+            } elseif ($this->adapter) {
+                $this->adapter = Instance::ensure($this->adapter, FilesystemAdapter::class);
+            }
 
-        if (!empty($this->filesystem->cache)) {
-            throw new InvalidConfigException('You should not use League\Flysystem\Cached\CachedAdapter due to its inefficiency. This extension has its own caching system.');
+            if (!$this->adapter instanceof FilesystemAdapter) {
+                throw new \Exception(); // TODO
+            }
+
+            $this->filesystem = new Filesystem($this->adapter);
         }
     }
 
@@ -40,14 +64,19 @@ class CloudAssetManager extends BaseAssetManager
      * @param string $src
      * @param array $options
      * @return string[]
+     * @throws \League\Flysystem\FilesystemException
      */
     protected function publishDirectory($src, $options)
     {
+        if (!$this->filesystem instanceof Filesystem) {
+            throw new \Exception(); // TODO
+        }
+
         $dir = $this->hash($src);
         $dstDir = $this->basePath . DIRECTORY_SEPARATOR . $dir;
 
         $finalKey = $this->getMetaKey($dir . '-completed');
-        $completed = \Yii::$app->cache->get($finalKey);
+        $completed = Yii::$app->cache->get($finalKey);
 
         if (!empty($options['forceCopy']) || ($this->forceCopy && !isset($options['forceCopy'])) || !$completed) {
             $currentLength = strlen($src);
@@ -78,7 +107,7 @@ class CloudAssetManager extends BaseAssetManager
                 $dirMeta = isset($meta[$key]) ? $meta[$key] : null;
 
                 if (!isset($dirMeta)) {
-                    $this->filesystem->createDir($dstDir . $dstDirectory);
+                    $this->filesystem->createDirectory($dstDir . $dstDirectory);
                 }
             }
 
@@ -101,32 +130,41 @@ class CloudAssetManager extends BaseAssetManager
                             $afterCopy($file, $dstDir . $dstFile);
                         }
                     }
-                } catch (FileExistsException $e) {
+                } catch (UnableToWriteFile $e) {
                     // Do nothing
                 }
             }
 
-            \Yii::$app->cache->set($finalKey, true);
+            Yii::$app->cache->set($finalKey, true);
         }
 
         return [$dstDir, $this->baseUrl . '/' . $dir];
     }
 
     /**
-     * @param array $data
+     * @param DirectoryListing $data
+     * @psalm-param DirectoryListing<StorageAttributes> $data
      * @param string $hash
      * @return array
+     * @psalm-return array<string, array<string, 1>>
      */
-    private function getMetaFromRemoteData(array $data, $hash)
+    private function getMetaFromRemoteData(DirectoryListing $data, string $hash): array
     {
         $meta = [];
         $key = $this->getMetaKey($hash);
         $meta[$key] = [];
 
+        $common_prefix_length = strlen($this->basePath) + 1;
+
         foreach ($data as $item) {
-            if ($item['type'] === 'file') {
-                $key = $this->getMetaKey(substr($item['dirname'], strlen($this->basePath) + 1));
-                $meta[$key][$item['basename']] = 1;
+            if ($item->type() === StorageAttributes::TYPE_FILE) {
+                $path_without_prefix = substr($item->path(), $common_prefix_length);
+                $basedir_without_prefix = dirname($path_without_prefix);
+
+                $key = $this->getMetaKey($basedir_without_prefix);
+                $filename = basename($item->path());
+
+                $meta[$key][$filename] = 1;
             }
         }
 
