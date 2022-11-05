@@ -1,0 +1,15 @@
+<?php
+
+namespace yii\di;
+
+class Instance
+{
+    /**
+     * @template T
+     * @param object|string|array|static $reference
+     * @psalm-param class-string<T>|null $type
+     * @param ServiceLocator|Container|null $container
+     * @psalm-return ($type is class-string<T> ? T : object)
+     */
+    public static function ensure($reference, $type = null, $container = null) {}
+}
