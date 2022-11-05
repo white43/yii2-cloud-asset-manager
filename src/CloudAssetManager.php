@@ -157,13 +157,17 @@ class CloudAssetManager extends BaseAssetManager
         $common_prefix_length = strlen($this->basePath) + 1;
 
         foreach ($data as $item) {
-            if ($item->type() === StorageAttributes::TYPE_FILE) {
+            if ($item->type() === StorageAttributes::TYPE_DIRECTORY) {
+                $path_without_prefix = substr($item->path(), $common_prefix_length);
+
+                $key = $this->getMetaKey($path_without_prefix);
+                $meta[$key] = [];
+            } elseif ($item->type() === StorageAttributes::TYPE_FILE) {
                 $path_without_prefix = substr($item->path(), $common_prefix_length);
                 $basedir_without_prefix = dirname($path_without_prefix);
 
                 $key = $this->getMetaKey($basedir_without_prefix);
                 $filename = basename($item->path());
-
                 $meta[$key][$filename] = 1;
             }
         }
