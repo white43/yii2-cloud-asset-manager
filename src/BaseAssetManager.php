@@ -106,7 +106,10 @@ class BaseAssetManager extends \yii\web\AssetManager
         $key = sprintf(self::CACHE_HASH_KEY, $path);
         $hash = $this->cache->get($key);
 
-        if ($hash === false) {
+        // During warm-up process we need to renew a cached hash
+        $is_cli = PHP_SAPI === 'cli';
+
+        if ($hash === false || $is_cli) {
             $files = FileHelper::findFiles($path, $this->filterFilesOptions);
             $hashes = [];
 
