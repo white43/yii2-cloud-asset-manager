@@ -2,6 +2,7 @@
 
 namespace white43\CloudAssetManager\commands;
 
+use white43\CloudAssetManager\BaseAssetManager;
 use Yii;
 use yii\base\InvalidConfigException;
 use yii\console\Controller;
@@ -16,11 +17,11 @@ class WarmUpController extends Controller
 {
     /**
      * @return int
-     * @throws \yii\base\InvalidConfigException
+     * @throws InvalidConfigException
      */
-    public function actionIndex()
+    public function actionIndex(): int
     {
-        /** @var \white43\CloudAssetManager\BaseAssetManager $am */
+        /** @var BaseAssetManager $am */
         $am = Yii::$app->get('assetManager');
 
         $time = -microtime(true);

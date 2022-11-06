@@ -6,6 +6,7 @@ use Closure;
 use League\Flysystem\DirectoryListing;
 use League\Flysystem\Filesystem;
 use League\Flysystem\FilesystemAdapter;
+use League\Flysystem\FilesystemException;
 use League\Flysystem\StorageAttributes;
 use League\Flysystem\UnableToWriteFile;
 use yii\base\InvalidConfigException;
@@ -28,7 +29,7 @@ class CloudAssetManager extends BaseAssetManager
 
     /**
      * Initializes the component.
-     * @throws \yii\base\InvalidConfigException
+     * @throws InvalidConfigException
      */
     public function init(): void
     {
@@ -63,10 +64,9 @@ class CloudAssetManager extends BaseAssetManager
      * @param string $src
      * @param array $options
      * @return string[]
-     * @throws \League\Flysystem\FilesystemException
-     * @throws InvalidConfigException
+     * @throws FilesystemException
      */
-    protected function publishDirectory($src, $options)
+    protected function publishDirectory($src, $options): array
     {
         if (!$this->filesystem instanceof Filesystem) {
             throw new \Exception(); // TODO
@@ -109,7 +109,7 @@ class CloudAssetManager extends BaseAssetManager
                 }
 
                 $key = $this->getMetaKey($dir . $dstDirectory);
-                $dirMeta = isset($meta[$key]) ? $meta[$key] : null;
+                $dirMeta = $meta[$key] ?? null;
 
                 if (!isset($dirMeta)) {
                     $this->filesystem->createDirectory($dstDir . $dstDirectory);
@@ -125,7 +125,7 @@ class CloudAssetManager extends BaseAssetManager
                 }
 
                 $key = $this->getMetaKey(dirname($dir . $dstFile));
-                $dirMeta = isset($meta[$key]) ? $meta[$key] : null;
+                $dirMeta = $meta[$key] ?? null;
 
                 try {
                     if (!isset($dirMeta[$dstBaseFile])) {
@@ -184,7 +184,7 @@ class CloudAssetManager extends BaseAssetManager
      * @param string $dir
      * @return string
      */
-    private function getMetaKey($dir)
+    private function getMetaKey(string $dir): string
     {
         return rtrim(sprintf(self::CACHE_META_KEY, $dir), '-/');
     }
