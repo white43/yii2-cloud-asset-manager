@@ -3,6 +3,7 @@
 namespace white43\CloudAssetManager;
 
 use yii\base\InvalidArgumentException;
+use yii\base\InvalidValueException;
 use yii\caching\Cache;
 use yii\di\Instance;
 use yii\helpers\FileHelper;
@@ -126,7 +127,10 @@ class BaseAssetManager extends \yii\web\AssetManager
         }
 
         if (!is_string($hash)) {
-            throw new \Exception(); // TODO
+            throw new InvalidValueException(sprintf(
+                'Expected to get hash string but got %s instead',
+                is_object($hash) ? get_class($hash) : gettype($hash)
+            ));
         }
 
         return $hash;

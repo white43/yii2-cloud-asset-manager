@@ -10,6 +10,7 @@ use League\Flysystem\FilesystemException;
 use League\Flysystem\StorageAttributes;
 use League\Flysystem\UnableToWriteFile;
 use yii\base\InvalidConfigException;
+use yii\base\InvalidValueException;
 use yii\di\Instance;
 use yii\helpers\FileHelper;
 
@@ -69,7 +70,11 @@ class CloudAssetManager extends BaseAssetManager
     protected function publishDirectory($src, $options): array
     {
         if (!$this->filesystem instanceof Filesystem) {
-            throw new \Exception(); // TODO
+            throw new InvalidValueException(sprintf(
+                'Expected to get object of class %s but got %s instead',
+                Filesystem::class,
+                is_object($this->filesystem) ? get_class($this->filesystem) : gettype($this->filesystem)
+            ));
         }
 
         $dir = $this->hash($src);
